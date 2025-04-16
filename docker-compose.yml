@@ -1,0 +1,41 @@
+services:
+  web:
+    build: .
+    ports:
+      - "8000:8000"
+    volumes:
+      - .:/app
+    command: uvicorn app.main:app --host 0.0.0.0 --reload
+    depends_on:
+      - redis
+    networks:
+      - network  # Подключение к сети
+
+  redis:
+    image: "redis:latest"
+    ports:
+      - "6379:6379"
+    networks:
+      - network  # Подключение к сети
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 10s
+      retries: 5
+    
+  celery_worker:
+    build: .
+    command: sh -c "sleep 5 && celery -A app.celery.tasks worker --loglevel=info"
+    volumes:
+      - .:/app
+    depends_on:
+      redis:
+        condition: service_healthy
+    networks:
+      - network  # Подключение к сети
+
+# Явное объявление сети
+networks:
+  network:
+    driver: bridge  # Используем стандартный драйвер bridge
+  
