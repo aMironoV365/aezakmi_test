@@ -13,35 +13,19 @@ TEST_DATABASE_URL = "sqlite+aiosqlite:///:memory:"
 
 
 @pytest_asyncio.fixture()
-async def async_engine():
-    """
-    Фикстура для создания асинхронного SQLAlchemy движка.
-    Возвращает engine и закрывает его после тестов.
-    """
+async def async_session():
     engine = create_async_engine(TEST_DATABASE_URL, echo=True)
-    yield engine
-    await engine.dispose()
-
-
-@pytest_asyncio.fixture()
-async def async_session(async_engine: async_engine) -> async_engine:
-    """
-    Фикстура для создания новой тестовой базы данных и сессии.
-    Удаляет и пересоздаёт все таблицы перед запуском.
-    """
-    async with async_engine.begin() as conn:
+    async with engine.begin() as conn:
         await conn.run_sync(Base.metadata.drop_all)
         await conn.run_sync(Base.metadata.create_all)
 
-    async_session = sessionmaker(
-        async_engine, expire_on_commit=False, class_=AsyncSession
-    )
-
+    async_session = sessionmaker(engine, expire_on_commit=False, class_=AsyncSession)
     session = async_session()
     try:
         yield session
     finally:
         await session.close()
+        await engine.dispose()
 
 
 @pytest_asyncio.fixture
