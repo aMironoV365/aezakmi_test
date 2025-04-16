@@ -46,6 +46,13 @@ async def async_session(async_engine: async_engine) -> async_engine:
 
 @pytest_asyncio.fixture
 async def client(async_session):
+    """
+    Фикстура client предоставляет асинхронного клиента для тестирования FastAPI-приложений.
+    Этот клиент позволяет отправлять запросы к приложению в контексте теста,
+    заменяя зависимость для получения сессии базы данных на уже существующую сессию,
+    предоставляемую фикстурой async_session.
+    """
+
     async def override_get_session():
         yield async_session
 

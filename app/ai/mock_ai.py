@@ -1,5 +1,6 @@
 import random, asyncio
 
+
 async def analyze_text(text: str) -> dict:
     await asyncio.sleep(random.uniform(1, 3))
     if any(word in text.lower() for word in ["error", "exception", "failed"]):
@@ -14,5 +15,5 @@ async def analyze_text(text: str) -> dict:
     return {
         "category": category,
         "confidence": confidence,
-        "keywords": random.sample(text.split(), min(3, len(text.split())))
+        "keywords": random.sample(text.split(), min(3, len(text.split()))),
     }

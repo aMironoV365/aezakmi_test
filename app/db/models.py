@@ -4,6 +4,7 @@ from sqlalchemy import Column, String, DateTime, Float
 from sqlalchemy.dialects.postgresql import UUID
 from app.db.database import Base
 
+
 class Notification(Base):
     __tablename__ = "notifications"
 
