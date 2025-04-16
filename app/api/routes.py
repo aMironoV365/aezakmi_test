@@ -15,7 +15,7 @@ from app.config.redis_conf import get_redis
 
 router = APIRouter()
 
-@router.post("/", response_model=NotificationRead)
+@router.post("/create_notification", response_model=NotificationRead, summary="Создание уведомления")
 async def create_notification(data: NotificationCreate, session: AsyncSession = Depends(get_session)):
     notification = Notification(
         user_id=data.user_id,
@@ -28,7 +28,7 @@ async def create_notification(data: NotificationCreate, session: AsyncSession = 
     analyze_notification.delay(notification.id, notification.text)
     return notification
 
-@router.get("/", response_model=List[NotificationRead])
+@router.get("/notification_list", response_model=List[NotificationRead], summary="Получение списка уведомлений")
 async def list_notifications(
     user_id: UUID,
     skip: int = 0,
@@ -52,14 +52,14 @@ async def list_notifications(
 )
     return notifications
 
-@router.get("/{notification_id}", response_model=NotificationRead)
+@router.get("/notification{notification_id}", response_model=NotificationRead, summary="Получение уведомления по ID")
 async def get_notification(notification_id: UUID, session: AsyncSession = Depends(get_session)):
     notification = await session.get(Notification, notification_id)
     if not notification:
         raise HTTPException(status_code=404, detail="Notification not found")
     return notification
 
-@router.post("/{id}/mark_read", response_model=NotificationRead)
+@router.post("/notification{id}/mark_read", response_model=NotificationRead, summary="Отметить уведомление как прочитанное")
 async def mark_as_read(id: UUID, session: AsyncSession = Depends(get_session)):
     notification = await session.get(Notification, id)
     if not notification:
